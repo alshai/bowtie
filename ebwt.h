@@ -858,6 +858,7 @@ public:
         cerr << "EBWT_STATS total_LFs " << all_LFs << endl;
         cerr << "EBWT_STATS count_LFs " << all_LFs - mapLFs_rc_ << endl;
         cerr << "EBWT_STATS locate_LFs " << mapLFs_rc_ << endl;
+        cerr << "LF_STATS: " << all_LFs <<  " " << all_LFs - mapLFs_rc_ << " " << mapLFs_rc_ << endl;
 #endif
 	}
 
