@@ -386,7 +386,8 @@ public:
 	mapLFs_(0llu), \
 	mapLFcs_(0llu), \
 	mapLF1cs_(0llu), \
-	mapLF1s_(0llu)
+	mapLF1s_(0llu), \
+    mapLFs_rc_(0llu)
 #else
 #define Ebwt_STAT_INITS
 #endif
@@ -843,11 +844,20 @@ public:
 		if (_in2 != NULL) fclose(_in2);
 #ifdef EBWT_STATS
 		cout << (_fw ? "Forward index:" : "Mirror index:") << endl;
-		cout << "  mapLFEx:   " << mapLFExs_ << endl;
-		cout << "  mapLF:     " << mapLFs_   << endl;
-		cout << "  mapLF(c):  " << mapLFcs_  << endl;
-		cout << "  mapLF1(c): " << mapLF1cs_ << endl;
-		cout << "  mapLF(c):  " << mapLF1s_  << endl;
+        /*
+        cerr << "EBWT_STATS: ";
+		cerr << (_fw ? "Forward index:" : "Mirror index:") << endl;
+		cerr << "EBWT_STATS:   mapLFEx:    " << mapLFExs_ << endl;
+		cerr << "EBWT_STATS:   mapLF:      " << mapLFs_   << endl;
+		cerr << "EBWT_STATS:   mapLF(c):   " << mapLFcs_  << endl;
+		cerr << "EBWT_STATS:   mapLF1:     " << mapLF1s_  << endl;
+		cerr << "EBWT_STATS:   mapLF1(c):  " << mapLF1cs_ << endl;
+		cerr << "EBWT_STATS:   mapLF#rc:   " << mapLFs_rc_  << endl;
+        */
+        uint64_t all_LFs = mapLFExs_ + mapLFs_ + mapLFcs_ + mapLF1s_ + mapLF1cs_;
+        cerr << "EBWT_STATS total_LFs " << all_LFs << endl;
+        cerr << "EBWT_STATS count_LFs " << all_LFs - mapLFs_rc_ << endl;
+        cerr << "EBWT_STATS locate_LFs " << mapLFs_rc_ << endl;
 #endif
 	}
 
@@ -1228,10 +1238,13 @@ public:
 	static const int      default_lineRate = 6;
 #endif
 
-	#ifdef EBWT_STATS
+#ifdef EBWT_STATS
 	uint64_t   mapLFExs_;
 	uint64_t   mapLFs_;
 	uint64_t   mapLFcs_;
+    uint64_t   mapLF1s_;
+    uint64_t   mapLF1cs_;
+    uint64_t   mapLFs_rc_;
 #endif
 
 private:
@@ -2752,6 +2765,9 @@ inline bool Ebwt<TStr>::reportChaseOne(const String<Dna5>& query,
 	// Walk along until we reach the next marked row to the left
 	while(((i & offMask) != i) && i != _zOff) {
 		// Not a marked row; walk left one more char
+#ifdef EBWT_STATS
+	const_cast<Ebwt<TStr>*>(this)->mapLFs_rc_++;
+#endif
 		TIndexOffU newi = mapLF(*l); // calc next row
 		assert_neq(newi, i);
 		i = newi;                                  // update row
